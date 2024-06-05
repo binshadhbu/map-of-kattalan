@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { UserContext } from '../context/UserContext';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import PlacesPage from './PlacesPage';
 
 
 function AccountPage() {
@@ -69,6 +70,12 @@ function AccountPage() {
         <div className='text-center max-w-lg mx-auto'>
           Logged in as {user.name} ({user.email})
           <button className='primary mx-w-sm mt-2' onClick={logout}>Logout</button>
+        </div>
+      )}
+
+      {subpage==='places' &&(
+        <div>
+          <PlacesPage/>
         </div>
       )}
     </div>
