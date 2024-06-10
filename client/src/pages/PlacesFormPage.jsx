@@ -5,8 +5,11 @@ import PhotosUploader from '../components/PhotosUploader';
 import axios from 'axios';
 import AccountNav from '../components/AccountNav';
 import { Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function PlacesFormPage() {
+    const {id}=useParams();
+    console.log(id);
     const [title, setTitle] = useState('');
     const [address, setAddress] = useState('');
     const [addedPhotos, setAddedPhotos] = useState('');
