@@ -2,10 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const User = require("./model/user.js");
 const bcrypt = require("bcryptjs");
+const Place = require('./model/Place.js');
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const imageDownloader=require('image-downloader');
 const cookieParser = require("cookie-parser");
+const multer = require('multer');
 
 require("dotenv").config();
 const app = express();
@@ -101,6 +103,44 @@ app.post('/upload-by-link',async (req,res)=>{
   });
   console.log(link);
   res.json(newName);
+});
+
+const photosMiddleware = multer({dest:'/tmp'});
+app.post('/upload', photosMiddleware.array('photos', 100), async (req,res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const {path,originalname,mimetype} = req.files[i];
+    const url = await uploadToS3(path, originalname, mimetype);
+    uploadedFiles.push(url);
+  }
+  res.json(uploadedFiles);
+});
+
+app.post('/places', (req,res) => {
+  mongoose.connect(process.env.MONGO_URL);
+  const {token} = req.cookies;
+  const {
+    title,address,addedPhotos,description,price,
+    perks,extraInfo,checkIn,checkOut,maxGuests,
+  } = req.body;
+  jwt.verify(token, jwtsecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const placeDoc = await Place.create({
+      owner:userData.id,price,
+      title,address,photos:addedPhotos,description,
+      perks,extraInfo,checkIn,checkOut,maxGuests,
+    });
+    res.json(placeDoc);
+  });
+});
+
+app.get('/places', (req,res) => {
+  mongoose.connect(process.env.MONGO_URL);
+  const {token} = req.cookies;
+  jwt.verify(token, jwtsecret, {}, async (err, userData) => {
+    const {id} = userData;
+    res.json( await Place.find({owner:id}) );
+  });
 });
 
 app.listen(4000);
