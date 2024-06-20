@@ -33,6 +33,7 @@ app.get("/test", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
+  mongoose.connect(mongoURL);
   const { name, email, password } = req.body;
   res.json({ name, email, password });
   try {
@@ -49,6 +50,7 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+  mongoose.connect(mongoURL);
   const { email, password } = req.body;
   const userDoc = await User.findOne({ email });
   if (userDoc) {
@@ -91,6 +93,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/upload-by-link", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
   const { link } = req.body;
   const newName = "photo" + Date.now() + ".jpg";
   await imageDownloader.image({
@@ -103,10 +106,11 @@ app.post("/upload-by-link", async (req, res) => {
 
 const photosMiddleware = multer({ dest: "/tmp" });
 app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
     const { path, originalname, mimetype } = req.files[i];
-    const url = await uploadToS3(path, originalname, mimetype);
+    // const url = await uploadToS3(path, originalname, mimetype);
     uploadedFiles.push(url);
   }
   res.json(uploadedFiles);
@@ -146,7 +150,7 @@ app.post("/places", (req, res) => {
   });
 });
 
-app.get("/places", (req, res) => {
+app.get("/user-places", (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { token } = req.cookies;
   jwt.verify(token, jwtsecret, {}, async (err, userData) => {
@@ -163,7 +167,7 @@ app.get("/places/:id", async (req, res) => {
     const place = await Place.findById(id);
 
     // Closing the database connection after the operation is completed
-    mongoose.connection.close();
+    // mongoose.connection.close();
 
     res.json(place);
   } catch (error) {
@@ -185,7 +189,6 @@ app.put("/places", async (req, res) => {
     checkIn,
     checkOut,
     maxGuests,
-
   } = req.body;
   jwt.verify(token, jwtsecret, {}, async (err, userData) => {
     if (err) throw err;
@@ -207,5 +210,10 @@ app.put("/places", async (req, res) => {
     }
   });
 });
+
+app.get('/places',async (req,res)=>{
+  res.json(await Place.find());
+})
+
 
 app.listen(4000);
