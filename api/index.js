@@ -189,6 +189,7 @@ app.put("/places", async (req, res) => {
     checkIn,
     checkOut,
     maxGuests,
+    price
   } = req.body;
   jwt.verify(token, jwtsecret, {}, async (err, userData) => {
     if (err) throw err;
@@ -204,6 +205,7 @@ app.put("/places", async (req, res) => {
         checkIn,
         checkOut,
         maxGuests,
+        price
       });
       await placeDoc.save();
       res.json("ok");
@@ -214,6 +216,8 @@ app.put("/places", async (req, res) => {
 app.get('/places',async (req,res)=>{
   res.json(await Place.find());
 })
+
+
 
 
 app.listen(4000);
