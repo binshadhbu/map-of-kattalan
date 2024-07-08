@@ -25,8 +25,7 @@ app.use(
   })
 );
 
-const mongoURL =
-  "mongodb+srv://binshadh:KBpw6qqyGsncf52C@cluster0.cnyptju.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURL =process.env.url;
 mongoose.connect(mongoURL);
 
 app.get("/test", (req, res) => {
